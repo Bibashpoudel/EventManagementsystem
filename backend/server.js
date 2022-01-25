@@ -1,8 +1,13 @@
 import express from 'express'
 import mongoose from 'mongoose'
+import otpRouter from './router/otpRouter.js';
 import userRouter from './router/userRouter.js';
+import dotenv  from 'dotenv'
+import categoriesRouter from './router/categoriesRouter.js';
 
 const app = express();
+
+dotenv.config()
 
 app.use(express.json()); ////middleware
 app.use(express.urlencoded({ extended :false })); ///middleware
@@ -21,6 +26,8 @@ app.get('/', (req, res)=>{
     res.send("welcome from server")
 })
 app.use('/api/user', userRouter)
+app.use('/api/otp', otpRouter)
+app.use('/api/category', categoriesRouter)
 
 
 

@@ -15,30 +15,35 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     const userphone = await User.findOne({ phone: req.body.phone });
 
-    let length = 6;
-        const codegen = ("0".repeat(length) + Math.floor(Math.random() * 10 ** length)).slice(-length);
-        console.log(codegen)
+    let decoded;
+
+    //Check if verification key is altered or not and store it in variable decoded after decryption
+    try{
+      decoded = await decode(verification_key)
+    }
+    catch(err) {
+      const response={"Status":"Failure", "Details":"Bad Request"}
+      return res.status(400).send(response)
+    }
+
+    var obj= JSON.parse(decoded)
+    const check_obj = obj.check
+
+    // Check if the OTP was meant for the same email or phone number for which it is being verified 
+    if(check_obj!=check){
+      const response={"Status":"Failure", "Details": "OTP was not sent to this particular email or phone number"}
+      return res.status(400).send(response) 
+    }
+
+    const otp_schema = await OTP.findOne({ where: { id: obj.otp_id } })
+    if (otp_schema.verification != true) {
+        const response={"Status":"Failure","Details":"OTP NOT Verified"}
+        return res.status(400).send(response) 
+
+    }
+   
     if (!user) {
-        let data = JSON.stringify({
-            "email": user,
-            "code": codegen
-          });
-        const config = {
-            method: 'post',
-            url: 'localhost:5000/api/otp/send',
-            headers: { 
-              'Content-Type': 'application/json'
-            },
-            data : data
-          };
-          
-          axios(config)
-          .then(function (response) {
-            console.log(JSON.stringify(response.data));
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
+        
         
         if (!userphone) {
             const bcryptpassword = bcrypt.hashSync(req.body.password, 8)
@@ -82,7 +87,7 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
 
                 // setup email data with unicode symbols
                 let mailOptions = {
-                    from: '"TechFortress" contact@techfortress.com', // sender address
+                    from: '"TechFortress" <contact@techfortress.com>', // sender address
                     to: adduser.email, // list of receivers
                     subject: 'Welcome Message', // Subject line
                     text: "Dear " + adduser.firstname + ', \n \n Thank You for Registration. \n Successfully Register', // plain text body

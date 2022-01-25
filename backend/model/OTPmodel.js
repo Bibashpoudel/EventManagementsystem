@@ -2,24 +2,22 @@ import mongoose from 'mongoose';
 
 const otpSchema = new mongoose.Schema({
     
-    email:{
-        type:String,
-        required:true,
-        unique:true
-    },
     code:{
-        type:Number,
+        type:String,
         required:true
     },
     verification: {
         type: Boolean,
         reuired: true,
-        default:false
+        
+    },
+    expire_time: {
+        type: Date,
     }
 },{
     timestamps: true
 })
 
-const OTP = mongoose.model('OTP', otpSchema);
+const OTP = mongoose.model('OTPEmail', otpSchema);
 
 export default OTP;
