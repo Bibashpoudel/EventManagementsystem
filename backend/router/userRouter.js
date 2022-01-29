@@ -7,25 +7,28 @@ import { generateToken } from '../utils.js';
 import User from '../model/userModel.js';
 import nodemailer from 'nodemailer'
 import axios from 'axios'
-
+import {encode, decode} from '../middleware/endcoder.js'
+import OTP from '../model/OTPmodel.js';
 
 const userRouter = express.Router();
 
 userRouter.post('/register', expressAsyncHandler(async (req, res) => {
-    const user = await User.findOne({ email: req.body.email });
-    const userphone = await User.findOne({ phone: req.body.phone });
-
-    let decoded;
+    const user = await User.findOne({ where:{email: req.body.email} });
+    const userphone = await User.findOne({ where:{phone: req.body.phone} });
+    const verification_key = req.body.verification;
+    const check = req.body.email
+    
 
     //Check if verification key is altered or not and store it in variable decoded after decryption
-    try{
-      decoded = await decode(verification_key)
-    }
-    catch(err) {
-      const response={"Status":"Failure", "Details":"Bad Request"}
-      return res.status(400).send(response)
-    }
+    // try{
+     
+    // }
+    // catch(err) {
+    //   const response={"Status":"Failure", "Details":"Bad Request"}
+    //   return res.status(400).send(response)
+    // }
 
+    let decoded = await decode(verification_key)
     var obj= JSON.parse(decoded)
     const check_obj = obj.check
 
@@ -48,8 +51,8 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
         if (!userphone) {
             const bcryptpassword = bcrypt.hashSync(req.body.password, 8)
             const user = new User({
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
+               
+                fullname: req.body.fullname,
                 email: req.body.email,
                 phone: req.body.phone,
                 isAdmin: req.body.isAdmin,
@@ -65,8 +68,8 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
                     <p>You have a new contact request</p>
                     <h3>Your Details Details</h3>
                     <ul>  
-                    <li>First Name: ${adduser.firstname}</li>
-                    <li>Last Name: ${adduser.lastname}</li>
+                    <li>First Name: ${adduser.fullname}</li>
+                    
                     <li>Email: ${adduser.email}</li>
                     <li>Phone: ${adduser.phone}</li>
                     </ul>
@@ -90,7 +93,7 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
                     from: '"TechFortress" <contact@techfortress.com>', // sender address
                     to: adduser.email, // list of receivers
                     subject: 'Welcome Message', // Subject line
-                    text: "Dear " + adduser.firstname + ', \n \n Thank You for Registration. \n Successfully Register', // plain text body
+                    text: "Dear " + adduser.fullname + ', \n \n Thank You for Registration. \n Successfully Register', // plain text body
                     html :output
                 };
 
@@ -136,8 +139,8 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
         if(bcrypt.compareSync(req.body.password, user.password)){
             res.send({
                 _id:user._id,
-                firstname: user.firstname,
-                lastname:user.lastname,
+                
+                fullname:user.fullname,
                 email: user.email,
                 phone: user.phone,
                 isAdmin:user.isAdmin,

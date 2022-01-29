@@ -6,15 +6,7 @@ const serviceSchema = new mongoose.Schema({
     name: {
         type:String,
     },
-    geolocation: [
-        {
-            lat: {
-            type:string
-        }, lan: {
-            type:String
-            }
-        }
-    ],
+    
     price: {
         type:String
     },

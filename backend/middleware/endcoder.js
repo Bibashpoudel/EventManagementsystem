@@ -35,24 +35,24 @@ function password_derive_bytes(password, salt, iterations, len) {
 }
 
 // Function to encode the object
-async function encode(string) {
+async function encode(reciveddata) {
    
     var  key = password_derive_bytes(password, '', 100, 32);
     // Initialize Cipher Object to encrypt using AES-256 Algorithm 
     
     var cipher = crypto.createCipheriv('aes-256-cbc',key,ivs);
-    var  part1 = cipher.update(string, 'utf8');
+    var  part1 = cipher.update(reciveddata, 'utf8');
     var  part2 = cipher.final();
     var  encrypted = Buffer.concat([part1, part2]).toString('base64');
     return encrypted;
 }
 
 // Function to decode the object
-async function decode(string) {
+async function decode(reciveddata) {
     var  key = password_derive_bytes(password, '', 100, 32);
     // Initialize decipher Object to decrypt using AES-256 Algorithm
     var  decipher = crypto.createDecipheriv('aes-256-cbc', key, ivs);
-    var  decrypted = decipher.update(string, 'base64', 'utf8');
+    var  decrypted = decipher.update(reciveddata, 'base64', 'utf8');
     decrypted += decipher.final();
     return decrypted;
 }

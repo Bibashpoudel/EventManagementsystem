@@ -38,7 +38,7 @@ var dates = {
     compare:function(a,b) {
         // Compare two dates (could be of any type supported by the convert
         // function above) and returns:
-        //  -1 : if a < b
+        //  -1 : if  a< b
         //   0 : if a = b
         //   1 : if a > b
         // NaN : if a or b is an illegal date
@@ -48,6 +48,7 @@ var dates = {
             (a>b)-(a<b) :
             NaN
         );
+        
     },
     inRange:function(d,start,end) {
         // Checks if date in d is between dates in start and end.
@@ -73,31 +74,32 @@ var dates = {
 
 
 otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
-
-    
-    try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ where:{email: req.body.email} });
         const isExist = await OTP.findOne({ email: req.body.email });
         const email = req.body.email;
         const type = req.body.type
         let email_subject, email_message;
+    
+    try {
+        
+       
         if (user) {
-            const response = { "Status": "failure", "Details": "Email already exist" }
+            const response = { "Status": "failure", "message": "Email already exist" }
             return res.status(400).send(response)
         }
         if (!email) {
-            const response = { "Status": "failure", "Details": "Email not Provided" }
+            const response = { "Status": "failure", "message": "Email not Provided" }
             return res.status(400).send(response)
         }
         if (!type) {
-            const response = { "Status": "Failure", "Details": "Type not provided" }
+            const response = { "Status": "Failure", "message": "Type not provided" }
             return res.status(400).send(response)
         }
         //const otp = otpGenerator.generate(6, {digits:true, upperCaseAlphabets: false, specialChars: false ,alphabets:false });
         const otp = await otpGen();        
         const now = new Date();
         const expiration_time = AddMinutesToDate(now, 10);
-        console.log(otp)
+        
         const otp_data = new OTP({
             code: otp,
             expire_time: expiration_time,
@@ -105,78 +107,92 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
            
             
         })
+
+        const otpsave = await otp_data.save()
+        // if (otpsave) {
+        //     return res.status(201).send(otpsave)
+        // }
+
        
-        
-            console.log("bibash")
-            const details={
-                "timestamp": now, 
+        console.log(otpsave)
+       
+        if (otpsave) {
+            const messages={
+                "dates": now, 
                 "check": email,
                 "success": true,
                 "message":"OTP sent to user",
-                "otp_id": otp_data.id
-              }
-          
-              // Encrypt the details object
+                "otp_id": otp_data._id
+                }
             
-            const encoded= await encode(JSON.stringify(details))
+                // Encrypt the message object
+            
+            const encoded = await encode(JSON.stringify(messages))
+            
+            
            
-        if (type) {
-            if (type == "VERIFICATION") {
+            if (type) {
+                if (type == "VERIFICATION") {
+                   
+                   
+                    email_message = message(otp)
+                    email_subject = subject_mail
+                   
+                }
                
-                email_message = message(otp)
-                email_subject = subject_mail
+                // else if (type == "FORGET") {
+                //    import  message, subject_mail } from '../templates/email/email_forget';
+                //     email_message = message(otp)
+                //     email_subject = subject_mail
+                // }
+                // else if (type == "2FA") {
+                //     const { message, subject_mail } = '../templates/email/email_2FA';
+                //     email_message = message(otp)
+                //     email_subject = subject_mail
+                // }
+                // else {
+                //     const response = { "Status": "Failure", "message": "Incorrect Type Provided" }
+                //     return res.status(400).send(response)
+                // }
             }
-            // else if (type == "FORGET") {
-            //    import  message, subject_mail } from '../templates/email/email_forget';
-            //     email_message = message(otp)
-            //     email_subject = subject_mail
-            // }
-            // else if (type == "2FA") {
-            //     const { message, subject_mail } = '../templates/email/email_2FA';
-            //     email_message = message(otp)
-            //     email_subject = subject_mail
-            // }
-            // else {
-            //     const response = { "Status": "Failure", "Details": "Incorrect Type Provided" }
-            //     return res.status(400).send(response)
-            // }
-        }
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port:587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: 'pdlbibash77@gmail.com ', // generated ethereal user
-                pass: 'Bibash7$$&&@@'  // generated ethereal password
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
-      
-      
-        const mailOptions = {
-            from: `"Techfortress"<pdlbibash77@gmail.com>`,
-            to: `${email}`,
-            subject: email_subject,
-            text: email_message,
-        };
-      
-        await transporter.verify();
+            
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port:587,
+                secure: false, // true for 465, false for other ports
+                auth: {
+                    user: 'pdlbibash77@gmail.com ', // generated ethereal user
+                    pass: 'Bibash7$$&&@@'  // generated ethereal password
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+                
+            });
           
-        //Send Email
-        await transporter.sendMail(mailOptions, (error, response) => {
-            if (error) {
-                return res.status(400).send({ "Status": "messege send Fail", "Details": error });
-            } else {
-                return res.send({ "Status": "Success", "Details": encoded });
-            }
-
-        })
+           
+            const mailOptions = {
+                from: `"Techfortress"<pdlbibash77@gmail.com>`,
+                to: `${email}`,
+                subject: email_subject,
+                text: email_message,
+            };
+          
+            await transporter.verify();
+              
+            //Send Email
+            await transporter.sendMail(mailOptions, (error, response) => {
+                if (error) {
+                    return res.status(400).send({ "Status": "messege send Fail", "message": error });
+                }
+    
+            })
+            return res.status(201).send({token:encoded})
+        }
     
 
     } catch (error) {
-        const response={"Status":"server error","Details": error}
+        const response={"Status":"server error","message": error}
         return res.status(400).send(response)
     }
 }))
@@ -186,78 +202,82 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
     const {verification_key, otp, check} = req.body;
 
     if(!verification_key){
-      const response={"Status":"Failure","Details":"Verification Key not provided"}
+      const response={"Status":"Failure","message":"Verification Key not provided"}
       return res.status(400).send(response) 
     }
     if(!otp){
-      const response={"Status":"Failure","Details":"OTP not Provided"}
+      const response={"Status":"Failure","message":"OTP not Provided"}
       return res.status(400).send(response) 
     }
     if(!check){
-      const response={"Status":"Failure","Details":"Check not Provided"}
+      const response={"Status":"Failure","message":"email not Provided"}
       return res.status(400).send(response) 
     }
 
     let decoded;
 
     //Check if verification key is altered or not and store it in variable decoded after decryption
-    try{
-      decoded = await decode(verification_key)
-    }
-    catch(err) {
-      const response={"Status":"Failure", "Details":"Bad Request"}
-      return res.status(400).send(response)
-    }
+    console.log(verification_key)
+        decoded = await decode(verification_key)
+        console.log(decoded)
+    
 
-    var obj= JSON.parse(decoded)
-    const check_obj = obj.check
+        var obj = JSON.parse(decoded)
+        console.log("obj",obj)
+        const check_obj = obj.check
 
     // Check if the OTP was meant for the same email or phone number for which it is being verified 
     if(check_obj!=check){
-      const response={"Status":"Failure", "Details": "OTP was not sent to this particular email or phone number"}
+      const response={"Status":"Failure", "message": "OTP was not sent to this particular email or phone number"}
       return res.status(400).send(response) 
     }
 
-    const otp_schema= await OTP.findOne({where:{id: obj.otp_id}})
-
+        const otp_schema = await OTP.findOne({  _id: obj.otp_id  })
+      
+    console.log("decoded")
     //Check if OTP is available in the DB
-    if(otp_schema!=null){
+        if (otp_schema != null) {
+        console.log("bibash")
       //Check if OTP is already used or not
-      if(otp_schema.verification!=true){
+      if(otp_schema.verification !=true){
 
+          console.log(currentdate)
+          console.log(otp_schema.expire_time)
           //Check if OTP is expired or not
-          if (dates.compare(otp_schema.expiration_time, currentdate)==1){
-
+          console.log(dates.compare(otp_schema.expire_time, currentdate))
+          if (dates.compare(otp_schema.expire_time, currentdate)===1){
+              
               //Check if OTP is equal to the OTP in the DB
-              if(otp===otp_schema.otp){
+              console.log(otp, otp_schema.code)
+              if(otp === otp_schema.code){
                   // Mark OTP as verified or used
                   otp_schema.verification=true
                   otp_schema.save()
 
-                  const response={"Status":"Success", "Details":"OTP Matched", "Check": check}
+                  const response={"Status":"Success", "message":"OTP Matched", "Check": check}
                   return res.status(200).send(response)
               }
               else{
-                  const response={"Status":"Failure","Details":"OTP NOT Matched"}
+                  const response={"Status":"Failure","message":"OTP NOT Matched"}
                   return res.status(400).send(response) 
               }   
           }
           else{
-              const response={"Status":"Failure","Details":"OTP Expired"}
+              const response={"Status":"Failure","message":"OTP Expired"}
               return res.status(400).send(response) 
           }
       }
       else{
-          const response={"Status":"Failure","Details":"OTP Already Used"}
+          const response={"Status":"Failure","message":"OTP Already Used"}
           return res.status(400).send(response)
           }
       }
     else{
-        const response={"Status":"Failure","Details":"Bad Request"}
+        const response={"Status":"Failure","message":"Bad Request"}
         return res.status(400).send(response)
     }
   }catch(err){
-      const response={"Status":"Failure","Details": err.message}
+      const response={"Status":"Failure","message": err.message}
       return res.status(400).send(response)
   }
 

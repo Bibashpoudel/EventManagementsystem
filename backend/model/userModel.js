@@ -1,46 +1,54 @@
-import mongoose from 'mongoose';
+import Sequelize from 'sequelize'
+import db from '../database/postgressdb.js';
 
-const userSchema = new mongoose.Schema({
-    firstname:{
-        type:String,
-        required:true
+
+const User = db.sequelize.define('user', {
+    id:{
+        // Sequelize module has INTEGER Data_Type.
+        type:Sequelize.INTEGER,
+        // To increment user_id automatically.
+        autoIncrement:true,
+        // user_id can not be null.
+        allowNull:false,
+        // For uniquely identify user.
+        primaryKey:true
     },
-    lastname:{
-        type:String,
-        required:true
+    fullname:{
+        type:Sequelize.STRING,
+        allowNull: false
     },
     phone: {
-        type: String,
-        require:true
+        type: Sequelize.STRING,
+        allowNull: false
     },
     email:{
-        type:String,
-        required:true,
+        type:Sequelize.STRING,
+        allowNull: false
     },
     password:{
-        type:String,
-        required:true
+        type:Sequelize.STRING,
+        allowNull: false
     },
     isAdmin:{
-        type:Boolean,
+        type:Sequelize.BOOLEAN,
         default:false,
-        required:true
+        allowNull: true
     },
     isVendor: {
-        type: Boolean,
+        type: Sequelize.BOOLEAN,
         default: false,
-        required:true
+        allowNull: true
     },
     isCustomer: {
-        type: Boolean,
+        type: Sequelize.BOOLEAN,
         default: false,
-        required:true
-    }
+        allowNull: true
+    },
+    createdAt: Sequelize.DATE,
+    updatedAt: Sequelize.DATE,
     
-},{
-    timestamps: true
 })
 
-const User = mongoose.model('User', userSchema);
+User.sync()
 
 export default User;
