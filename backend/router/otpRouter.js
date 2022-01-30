@@ -2,10 +2,9 @@ import express from 'express';
 
 
 import expressAsyncHandler from 'express-async-handler';
-import otpGenerator from 'otp-generator'
 import OTP from '../model/OTPmodel.js';
 import User from '../model/userModel.js';
-import  { message, subject_mail } from '../templates/email/email_verification.js';
+import  { messageEV, messageF, subject_mailEV, subject_mailF } from '../templates/email/email_verification.js';
 import nodemailer from 'nodemailer'
 const otpRouter = express.Router();
 import { otpGen } from 'otp-gen-agent'
@@ -74,7 +73,13 @@ var dates = {
 
 
 otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
-        const user = await User.findOne({ where:{email: req.body.email} });
+    const user = await User.findOne({ where: { email: req.body.email } });
+    const phone = req.body.phone;
+    let Ephone;
+    if (phone) {
+         Ephone = await User.findOne({ where:{phone: req.body.phone} });
+    }
+       
         const isExist = await OTP.findOne({ email: req.body.email });
         const email = req.body.email;
         const type = req.body.type
@@ -82,11 +87,17 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
     
     try {
         
-       
-        if (user) {
+        console.log("bibash")
+        if (user && type != "FORGET") {
             const response = { "Status": "failure", "message": "Email already exist" }
             return res.status(400).send(response)
         }
+        console.log("bibash")
+        if (Ephone) {
+            const response = { "Status": "failure", "message": "Phone already exist" }
+            return res.status(400).send(response)
+        }
+        console.log("bibash")
         if (!email) {
             const response = { "Status": "failure", "message": "Email not Provided" }
             return res.status(400).send(response)
@@ -95,10 +106,16 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
             const response = { "Status": "Failure", "message": "Type not provided" }
             return res.status(400).send(response)
         }
+        if (!user && type === "FORGET") {
+            const response = { "Status": "failure", "message": "Email not exist" }
+            return res.status(400).send(response)
+        }
         //const otp = otpGenerator.generate(6, {digits:true, upperCaseAlphabets: false, specialChars: false ,alphabets:false });
+        console.log("bibash")
         const otp = await otpGen();        
         const now = new Date();
         const expiration_time = AddMinutesToDate(now, 10);
+       
         
         const otp_data = new OTP({
             code: otp,
@@ -135,25 +152,25 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
                 if (type == "VERIFICATION") {
                    
                    
-                    email_message = message(otp)
-                    email_subject = subject_mail
+                    email_message = messageEV(otp)
+                    email_subject = subject_mailEV
                    
                 }
                
-                // else if (type == "FORGET") {
-                //    import  message, subject_mail } from '../templates/email/email_forget';
-                //     email_message = message(otp)
-                //     email_subject = subject_mail
-                // }
+                else if (type == "FORGET") {
+                
+                    email_message = messageF(otp)
+                    email_subject = subject_mailF
+                }
                 // else if (type == "2FA") {
                 //     const { message, subject_mail } = '../templates/email/email_2FA';
                 //     email_message = message(otp)
                 //     email_subject = subject_mail
                 // }
-                // else {
-                //     const response = { "Status": "Failure", "message": "Incorrect Type Provided" }
-                //     return res.status(400).send(response)
-                // }
+                else {
+                    const response = { "Status": "Failure", "message": "Incorrect Type Provided" }
+                    return res.status(400).send(response)
+                }
             }
             
             const transporter = nodemailer.createTransport({

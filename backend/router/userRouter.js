@@ -9,6 +9,7 @@ import nodemailer from 'nodemailer'
 import axios from 'axios'
 import {encode, decode} from '../middleware/endcoder.js'
 import OTP from '../model/OTPmodel.js';
+import { messagePU, subject_mailPU } from '../templates/email/email_verification.js';
 
 const userRouter = express.Router();
 
@@ -17,16 +18,6 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
     const userphone = await User.findOne({ where:{phone: req.body.phone} });
     const verification_key = req.body.verification;
     const check = req.body.email
-    
-
-    //Check if verification key is altered or not and store it in variable decoded after decryption
-    // try{
-     
-    // }
-    // catch(err) {
-    //   const response={"Status":"Failure", "Details":"Bad Request"}
-    //   return res.status(400).send(response)
-    // }
 
     let decoded = await decode(verification_key)
     var obj= JSON.parse(decoded)
@@ -65,8 +56,8 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
             const adduser = await user.save();
             if (adduser) {  
                 const output = `
-                    <p>You have a new contact request</p>
-                    <h3>Your Details Details</h3>
+                    <p>Your Details</p>
+                    <h3>Your Details </h3>
                     <ul>  
                     <li>First Name: ${adduser.fullname}</li>
                     
@@ -131,14 +122,14 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
 
 //signin function
 userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
-    const text = req.body.text;
-    const user = await User.findOne({ email: req.body.email });
-    const userphone = await User.findOne({phone:req.body.phone});
+    
+    const user = await User.findOne({ where:{email: req.body.email} });
+    // const userphone = await User.findOne({phone:req.body.phone});
        
-    if(user || userphone){
+    if(user){
         if(bcrypt.compareSync(req.body.password, user.password)){
             res.send({
-                _id:user._id,
+                id:user.id,
                 
                 fullname:user.fullname,
                 email: user.email,
@@ -157,7 +148,90 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
         } else {
             return res.status(400).send({message:'Invalid Email or Phone'})
         }
-    }));
+}));
+userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
+    const user = await User.findOne({ where:{email: req.body.email} });
+    // const userphone = await User.findOne({ where:{phone: req.body.phone} });
+    const verification_key = req.body.verification;
+    const check = req.body.email;
+    const password = req.body.password;
+    // let email_subject, email_message;
+    try {
+        
+        console.log('1')
+        let decoded = await decode(verification_key)
+        console.log(decoded)
+        var obj= JSON.parse(decoded)
+        const check_obj = obj.check
+        console.log('2')
+
+        // Check if the OTP was meant for the same email or phone number for which it is being verified 
+        if(check_obj!=check){
+        const response={"Status":"Failure", "Details": "OTP was not sent to this particular email or phone number"}
+        return res.status(400).send(response) 
+        }
+        console.log('2')
+        const otp_schema = await OTP.findOne({ where: { _id: obj.otp_id } })
+        if (otp_schema.verification != true) {
+            const response={"Status":"Failure","Details":"OTP NOT Verified"}
+            return res.status(400).send(response) 
+
+        }
+        if (user) {
+            console.log('3')
+            const bcryptpassword = bcrypt.hashSync(password, 8)
+            user.password = bcryptpassword;
+            user.save()
+            console.log('4')
+            const fullname = user.fullname
+            const email_message = messagePU(fullname)
+            const email_subject = subject_mailPU
+            console.log('5')
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port:587,
+                secure: false, // true for 465, false for other ports
+                auth: {
+                    user: 'pdlbibash77@gmail.com ', // generated ethereal user
+                    pass: 'Bibash7$$&&@@'  // generated ethereal password
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+                
+            });
+            console.log('6')
+           
+            const mailOptions = {
+                from: `"Techfortress"<pdlbibash77@gmail.com>`,
+                to: `${check}`,
+                subject: email_subject,
+                text: email_message,
+            };
+            console.log('5')
+            await transporter.verify();
+              
+            //Send Email
+            await transporter.sendMail(mailOptions, (error, response) => {
+                if (error) {
+                    return res.status(400).send({ "Status": "messege send Fail", "message": error });
+                }
+    
+            })
+            console.log('6')
+            return res.status(201).send({message:"Password updated successfully"})
+        }
+        else {
+            const response = { "Status": "failure", "message": "Email not exits" }
+            return res.status(400).send(response)
+        }
+
+    } catch (error) {
+        return res.status(500).send(error)
+    
+    }
+    
+}))
 
 
 export default userRouter;
