@@ -8,8 +8,7 @@ const otpSchema = new mongoose.Schema({
     },
     verification: {
         type: Boolean,
-        reuired: true,
-        
+        reuired: true,  
     },
     expire_time: {
         type: Date,

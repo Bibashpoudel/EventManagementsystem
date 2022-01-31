@@ -8,6 +8,8 @@ import Sequelize from 'sequelize'
 import db from './database/postgressdb.js';
 import bodyParser from 'body-parser';
 import cors from 'cors'
+import subcategoriesRouter from './router/subCategories.js';
+import cityRouter from './router/cityRouter.js';
 
 
 const app = express();
@@ -36,28 +38,6 @@ db.sequelize.authenticate().then(() => {
     
     });
 
-// const whitelist = ["http://localhost:3000"]
-
-// const corsOptions = {
-
-//   origin: function (origin, callback) {
-
-//     if (!origin || whitelist.indexOf(origin) !== -1) {
-
-//       callback(null, true)
-
-//     } else {
-
-//       callback(new Error("Not allowed by CORS"))
-
-//     }
-
-//   },
-
-//   credentials: true,
-
-// }
-// app.use(cors(corsOptions))
 
 app.get('/', (req, res)=>{
     res.send("welcome from server")
@@ -65,8 +45,8 @@ app.get('/', (req, res)=>{
 app.use('/api/user', userRouter)
 app.use('/api/otp', otpRouter)
 app.use('/api/category', categoriesRouter)
-
-
+app.use('/api/subcategory', subcategoriesRouter)
+app.use('/api/city', cityRouter)
 
 app.listen(5000,()=>{
     console.log("http://localhost:5000")
