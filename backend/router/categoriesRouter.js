@@ -5,7 +5,12 @@ import Categories from '../model/categoriesModel.js'
 
 const categoriesRouter = express.Router()
 
-
+categoriesRouter.get('/', expressAsyncHandler(async (req, res) => {
+    const category = await Categories.find({})
+    if (category) {
+        return res.status(200).send(category)
+    }
+}))
 
 categoriesRouter.post('/add', expressAsyncHandler(async (req, res) => {
     try {

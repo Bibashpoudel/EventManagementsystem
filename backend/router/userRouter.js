@@ -142,12 +142,12 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
             return ;
         }
         else{
-            res.status(401).send({message:"invalid password"})
+            res.status(401).send({message:"Invalid password"})
         }
             
-        } else {
-            return res.status(400).send({message:'Invalid Email or Phone'})
-        }
+    } else {
+        return res.status(400).send({message:'Invalid Email'})
+    }
 }));
 userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
     const user = await User.findOne({ where:{email: req.body.email} });

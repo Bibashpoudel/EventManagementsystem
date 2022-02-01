@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors'
 import subcategoriesRouter from './router/subCategories.js';
 import cityRouter from './router/cityRouter.js';
+import serviceRouter from './router/serviceRouter.js';
 
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/otp', otpRouter)
 app.use('/api/category', categoriesRouter)
 app.use('/api/subcategory', subcategoriesRouter)
 app.use('/api/city', cityRouter)
+app.use('/api/service', serviceRouter)
 
 app.listen(5000,()=>{
     console.log("http://localhost:5000")

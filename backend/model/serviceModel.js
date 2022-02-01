@@ -25,7 +25,16 @@ const serviceSchema = new mongoose.Schema({
     city: {
         type: mongoose.Schema.Types.ObjectId,
         ref:'City'
+    },
+    subcategories: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Subcategorie'
+    },
+    isTrending: {
+        type: Boolean,  
     }
 }, {
     timestamps:true
 })
+const Service = mongoose.model('Service', serviceSchema);
+export default Service

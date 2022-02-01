@@ -2,7 +2,7 @@ import crypto from 'crypto'
 
 // First we get our unique key to encrypt our object
 var  password =  '4589654Bibash7$$&&@@';
-
+ 
 // We then get our unique Initialization Vector
 var iv = Buffer.from('20');
 const ivs = crypto.randomBytes(16);
