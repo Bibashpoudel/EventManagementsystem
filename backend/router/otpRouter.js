@@ -66,12 +66,6 @@ var dates = {
 }
 
 
-
-
-
-
-
-
 otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
     const phone = req.body.phone;
@@ -87,17 +81,17 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
     
     try {
         
-        console.log("bibash")
+        
         if (user && type != "FORGET") {
             const response = { "Status": "failure", "message": "Email already exist" }
             return res.status(400).send(response)
         }
-        console.log("bibash")
+       
         if (Ephone) {
             const response = { "Status": "failure", "message": "Phone already exist" }
             return res.status(400).send(response)
         }
-        console.log("bibash")
+        
         if (!email) {
             const response = { "Status": "failure", "message": "Email not Provided" }
             return res.status(400).send(response)
@@ -111,7 +105,7 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
             return res.status(400).send(response)
         }
         //const otp = otpGenerator.generate(6, {digits:true, upperCaseAlphabets: false, specialChars: false ,alphabets:false });
-        console.log("bibash")
+     
         const otp = await otpGen();        
         const now = new Date();
         const expiration_time = AddMinutesToDate(now, 10);
@@ -131,7 +125,7 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
         // }
 
        
-        console.log(otpsave)
+       
        
         if (otpsave) {
             const messages={
@@ -234,13 +228,13 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
     let decoded;
 
     //Check if verification key is altered or not and store it in variable decoded after decryption
-    console.log(verification_key)
+   
         decoded = await decode(verification_key)
-        console.log(decoded)
+      
     
 
         var obj = JSON.parse(decoded)
-        console.log("obj",obj)
+       
         const check_obj = obj.check
 
     // Check if the OTP was meant for the same email or phone number for which it is being verified 
@@ -251,21 +245,21 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
 
         const otp_schema = await OTP.findOne({  _id: obj.otp_id  })
       
-    console.log("decoded")
+   
     //Check if OTP is available in the DB
         if (otp_schema != null) {
-        console.log("bibash")
+    
       //Check if OTP is already used or not
       if(otp_schema.verification !=true){
 
-          console.log(currentdate)
-          console.log(otp_schema.expire_time)
+       
+        
           //Check if OTP is expired or not
-          console.log(dates.compare(otp_schema.expire_time, currentdate))
+   
           if (dates.compare(otp_schema.expire_time, currentdate)===1){
               
               //Check if OTP is equal to the OTP in the DB
-              console.log(otp, otp_schema.code)
+            
               if(otp === otp_schema.code){
                   // Mark OTP as verified or used
                   otp_schema.verification=true

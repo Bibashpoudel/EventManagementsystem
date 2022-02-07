@@ -16,19 +16,24 @@ const generateToken = (user) =>{
 };
 
 const isAuth =(req, res, next)=>{
-    const token = req.header.autorization;
-    if(token){
-        const onlyToken = token.slice(6 , token.lenght);
-        jwt.verify(onlyToken, config.JWT_SECRET, (err, decode)=>{
-            if(err){
-                return res.status(401).send({message:"Invalid token"})
-            }
-            req.user = token;
-            next();
-            return;
-        })
-    }
-    return  res.send(401).send({message:"token is not valid"})
+    const authorization = req.headers.authorization;
+  if (authorization) {
+    const token = authorization.slice(7, authorization.length); // Bearer XXXXXX
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'keepsecretbibash',
+      (err, decode) => {
+        if (err) {
+          res.status(401).send({ message: 'Invalid Token' });
+        } else {
+          req.user = decode;
+          next();
+        }
+      }
+    );
+  } else {
+    res.status(401).send({ message: 'No Token' });
+  }
 }
 
 const isAdmin = (req, res, next)=>{

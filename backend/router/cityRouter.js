@@ -21,5 +21,19 @@ cityRouter.post('/add', expressAsyncHandler(async (req, res) => {
     }
     
 }))
+cityRouter.get('/', expressAsyncHandler(async (req, res) => {
+    const city = await City.find()
+    if (city) {
+        return res.status(200).send(city)
+    }
+}))
+cityRouter.get('/:id', expressAsyncHandler(async (req, res) => {
+    // const city = req.query.city || '';
+    // const cityFilter = city ? { city } : {};
+
+    const onecity = await City.findById(req.params.id);
+        res.status(200).send(onecity)
+    
+}))
 
 export default cityRouter;

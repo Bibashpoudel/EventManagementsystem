@@ -91,10 +91,9 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
                 // send mail with defined transport object
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
-                        return console.log(error);
+                        
                     }
-                    console.log('Message sent: %s', info.messageId);
-                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                   
 
                     res.render('contact', { msg: 'Email has been sent' });
                 });
@@ -126,7 +125,7 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
     const user = await User.findOne({ where:{email: req.body.email} });
     // const userphone = await User.findOne({phone:req.body.phone});
        
-    if(user){
+    if(user ){
         if(bcrypt.compareSync(req.body.password, user.password)){
             res.send({
                 id:user.id,
@@ -146,7 +145,7 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
         }
             
     } else {
-        return res.status(400).send({message:'Invalid Email'})
+        return res.status(400).send({message:'Invalid Email or Phone'})
     }
 }));
 userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
@@ -158,19 +157,19 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
     // let email_subject, email_message;
     try {
         
-        console.log('1')
+       
         let decoded = await decode(verification_key)
-        console.log(decoded)
+        
         var obj= JSON.parse(decoded)
         const check_obj = obj.check
-        console.log('2')
+        
 
         // Check if the OTP was meant for the same email or phone number for which it is being verified 
         if(check_obj!=check){
         const response={"Status":"Failure", "Details": "OTP was not sent to this particular email or phone number"}
         return res.status(400).send(response) 
         }
-        console.log('2')
+        
         const otp_schema = await OTP.findOne({ where: { _id: obj.otp_id } })
         if (otp_schema.verification != true) {
             const response={"Status":"Failure","Details":"OTP NOT Verified"}
@@ -178,15 +177,15 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
 
         }
         if (user) {
-            console.log('3')
+            
             const bcryptpassword = bcrypt.hashSync(password, 8)
             user.password = bcryptpassword;
             user.save()
-            console.log('4')
+            
             const fullname = user.fullname
             const email_message = messagePU(fullname)
             const email_subject = subject_mailPU
-            console.log('5')
+            
             const transporter = nodemailer.createTransport({
                 host: 'smtp.gmail.com',
                 port:587,
@@ -200,7 +199,7 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
                 }
                 
             });
-            console.log('6')
+            
            
             const mailOptions = {
                 from: `"Techfortress"<pdlbibash77@gmail.com>`,
@@ -208,7 +207,7 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
                 subject: email_subject,
                 text: email_message,
             };
-            console.log('5')
+           
             await transporter.verify();
               
             //Send Email
@@ -218,7 +217,7 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
                 }
     
             })
-            console.log('6')
+           
             return res.status(201).send({message:"Password updated successfully"})
         }
         else {

@@ -1,6 +1,18 @@
 import mongoose from 'mongoose'
 
 
+const reviewSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true },
+        userId:{type:String, required:true},
+        comment: { type: String, required: true },
+        rating: { type: Number, required: true },
+    },
+    {
+        timestamps: true,
+    }
+);
+
 const serviceSchema = new mongoose.Schema({
     
     name: {
@@ -32,7 +44,12 @@ const serviceSchema = new mongoose.Schema({
     },
     isTrending: {
         type: Boolean,  
-    }
+    },
+    rating: { type: Number, required: true },
+    numReviews: { type: Number, required: true },
+    reviews: [reviewSchema],
+  
+    
 }, {
     timestamps:true
 })
