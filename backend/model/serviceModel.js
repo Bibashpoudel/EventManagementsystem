@@ -45,9 +45,9 @@ const serviceSchema = new mongoose.Schema({
     isTrending: {
         type: Boolean,  
     },
-    rating: { type: Number, required: true },
-    numReviews: { type: Number, required: true },
-    reviews: [reviewSchema],
+    rating: { type: Number, default:0},
+    numReviews: { type: Number,default:0},
+    
   
     
 }, {

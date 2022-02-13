@@ -33,7 +33,6 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
     if (otp_schema.verification != true) {
         const response={"Status":"Failure","Details":"OTP NOT Verified"}
         return res.status(400).send(response) 
-
     }
    
     if (!user) {
@@ -97,7 +96,16 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
 
                     res.render('contact', { msg: 'Email has been sent' });
                 });
-                return res.status(201).send({ message: "Your Account has been Created" })
+                return res.status(201).send({
+                    id:adduser.id,
+                    fullname:adduser.fullname,
+                    email: adduser.email,
+                    phone: adduser.phone,
+                    isAdmin:adduser.isAdmin,
+                    isVendor:adduser.isVendor,
+                    isCustomer:adduser.isCustomer,
+                    token:generateToken(adduser)
+                })
 
                     
             }
@@ -129,7 +137,6 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
         if(bcrypt.compareSync(req.body.password, user.password)){
             res.send({
                 id:user.id,
-                
                 fullname:user.fullname,
                 email: user.email,
                 phone: user.phone,

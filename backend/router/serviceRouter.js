@@ -65,6 +65,7 @@ serviceRouter.get('/venue', expressAsyncHandler(async (req, res) => {
     }
 
 }))
+//trending venue
 serviceRouter.get('/trending', expressAsyncHandler(async (req, res) => {
     const city = req.query.city || '';
     const cityFilter = city ? { city } : {};
@@ -107,12 +108,20 @@ serviceRouter.get('/trending', expressAsyncHandler(async (req, res) => {
     // }
     return res.status(500).send({message:'somethings Went wrong'})
 }))
-
+//popular service excluding venue
 serviceRouter.get('/popular', expressAsyncHandler(async (req, res) => {
     const service = await Service.find().sort({ 'rating': -1 }).limit(3)
     res.status(200).send(service)
 }))
 
+// getting servie Details
+serviceRouter.get('/:id', expressAsyncHandler(async (req, res) => {
+    const serviceId = req.params.id;
+    const service = await Service.findById(serviceId);
+    return res.status(200).send(service)
+}))
+
+//adding service
 serviceRouter.post('/add', expressAsyncHandler(async (req, res) => {
     
 
@@ -163,6 +172,68 @@ serviceRouter.post('/:id/review', isAuth, expressAsyncHandler(async (req, res) =
         res.status(404).send({ message: 'Service  Not Found' });
     }
 })) 
+// update reviews
+serviceRouter.put('/update/review/:id', isAuth, expressAsyncHandler(async (req, res) => {
+    const serviceId = req.body.service;
+    const reviewId = req.params.id
+    console.log(reviewId)
+    
+    const service = await Service.findById(serviceId);
+    const review = service.reviews.find((a) => a.id === reviewId)
+    console.log(review)
+    service.reviews.find(a => {
+        console.log(a._id)
+    })
+    const userId = req.user.id.toString()
+    // if (review) {
+    //     if (review.userId === userId) {
+    //         console.log('1')
+    //         review.rating=Number(req.body.rating),
+    //         review.comment = req.body.comment
+    //         console.log('2')
+    //         service.reviews.update(review);
+    //         console.log('3')
+    //         service.rating =
+    //             service.reviews.reduce((a, c) => c.rating + a, 0) /
+    //             service.reviews.length;
+    //         console.log('4')
+    //         const updateService = await service.save()
+    //         res.status(201).send({
+    //             message: 'Review update',
+    //             review: updateService.reviews[updateService.reviews.length - 1],
+    //           });
+            
+    //     }
+    //     else {
+    //         return res.status(401).send({message:"Unauthorized User"})
+    //     }
+    // }
+    if (review) {
+        const removes = await review.remove()
+        if (removes) {
+            res.send({message:'delete successfull'})
+        }
+      
+    }
+}))
+
+// get user review
+serviceRouter.get('/review/user', isAuth, expressAsyncHandler(async (req, res) => {
+    const service = await Service.find()
+    const count = await Service.count();
+    let Review = []
+    console.log(count)
+    let x = 0;
+    const user = req.user.id.toString()
+    for (x; x < count; x++){
+        if (service[x].reviews.find((a) => a.userId === user)) {
+            console.log('new')
+            Review.push(service[x])
+        }
+
+    }
+    return res.status(200).send(Review);
+}))
 
 
 

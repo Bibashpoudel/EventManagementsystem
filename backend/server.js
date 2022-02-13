@@ -11,6 +11,8 @@ import cors from 'cors'
 import subcategoriesRouter from './router/subCategories.js';
 import cityRouter from './router/cityRouter.js';
 import serviceRouter from './router/serviceRouter.js';
+import wishListRouter from './router/wishlistRouter.js';
+import reviewRouter from './router/ReviewRouter.js';
 
 
 const app = express();
@@ -49,6 +51,8 @@ app.use('/api/category', categoriesRouter)
 app.use('/api/subcategory', subcategoriesRouter)
 app.use('/api/city', cityRouter)
 app.use('/api/service', serviceRouter)
+app.use('/api/review', reviewRouter)
+app.use('/api/wishlist', wishListRouter)
 
 app.listen(5000,()=>{
     console.log("http://localhost:5000")

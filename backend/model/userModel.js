@@ -41,7 +41,7 @@ const User = db.sequelize.define('user', {
     },
     isCustomer: {
         type: Sequelize.BOOLEAN,
-        default: false,
+        default: true,
         allowNull: true
     },
     createdAt: Sequelize.DATE,
