@@ -79,6 +79,13 @@ const isVendor = (req, res, next) => {
         res.status(401).send({message:'is not Vendor'})
     }
 }
+const isVendorOrAdmin = (req, res, next) => {
+  if (req.user && (req.user.isVendor || req.user.isAdmin)) {
+    next();
+  } else {
+    res.status(401).send({ message: 'Invalid Admin/Seller Token' });
+  }
+};
 
 
 export {
@@ -86,5 +93,6 @@ export {
     isAdmin,
     isAuth,
     isVendor,
-    Tokenvalid
+    Tokenvalid,
+    isVendorOrAdmin,
 }

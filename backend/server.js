@@ -13,6 +13,8 @@ import cityRouter from './router/cityRouter.js';
 import serviceRouter from './router/serviceRouter.js';
 import wishListRouter from './router/wishlistRouter.js';
 import reviewRouter from './router/ReviewRouter.js';
+import path from 'path';
+import uploadRouter from './router/uploadRouter.js';
 
 
 const app = express();
@@ -21,7 +23,11 @@ dotenv.config()
 
 //request parsing
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// for storing file
+const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/wedding', {
     useNewUrlParser: true, //to get ride from duplicate waring
@@ -32,19 +38,16 @@ mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/wedding', {
 
 
 db.sequelize.authenticate().then(() => {
-
     console.log('Connection has been established successfully.');
-    
     }).catch(err => {
-    
     console.error('Unable to connect to the database:', err);
-    
-    });
-
+});
 
 app.get('/', (req, res)=>{
     res.send("welcome from server")
 })
+
+app.use('/api/uploads', uploadRouter);
 app.use('/api/user', userRouter)
 app.use('/api/otp', otpRouter)
 app.use('/api/category', categoriesRouter)
