@@ -1,24 +1,29 @@
 import mongoose from 'mongoose'
 
 
-const reviewSchema = new mongoose.Schema(
-    {
-        name: { type: String, required: true },
-        userId:{type:String, required:true},
-        comment: { type: String, required: true },
-        rating: { type: Number, required: true },
-    },
-    {
-        timestamps: true,
-    }
-);
+
 
 const serviceSchema = new mongoose.Schema({
     
     name: {
         type:String,
     },
-    price: {
+    minprice: {
+        type:String
+    },
+    maxprice: {
+        type:String
+    },
+    vegminprice: {
+        type:String
+    },
+    vegmaxprice: {
+        type:String
+    },
+    nonvegminprice: {
+        type:String
+    },
+    nonvegmaxprice: {
         type:String
     },
     image: {

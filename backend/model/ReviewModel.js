@@ -39,6 +39,7 @@ const Review = db.sequelize.define('Review', {
     updatedAt: Sequelize.DATE,
     
 })
-Review.sync()
+
+
 
 export default Review;

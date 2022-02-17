@@ -1,7 +1,7 @@
 import express from 'express'
 import expressAsyncHandler from 'express-async-handler';
 import ServiceDetails from '../model/serviceDetailsModel.js';
-import { isAuth, isVendor, isVendorOrAdmin } from '../utils';
+import { isAuth, isVendor, isVendorOrAdmin } from '../utils.js';
 
 
 
@@ -9,7 +9,7 @@ const serviceDetailsRouter = express.Router();
 
 
 
-serviceDetailsRouter.post('/add', isAuth, isVendorOrAdmin, expressAsyncHandler(async (req, res) => {
+serviceDetailsRouter.post('/add', isAuth, expressAsyncHandler(async (req, res) => {
     const service = req.body.service;
     try {
         const servicedetails = new ServiceDetails({
@@ -28,15 +28,15 @@ serviceDetailsRouter.post('/add', isAuth, isVendorOrAdmin, expressAsyncHandler(a
 
 // get serviceDetails for particular venue
 serviceDetailsRouter.get('/venue', expressAsyncHandler(async (req, res) => {
-    const service = req.body.service;
+    const service = req.query.service;
+    
     try {
         const serviceDetails = await ServiceDetails.find({ service: service });
         if (serviceDetails) {
+          
             return res.status(200).send(serviceDetails)
         }
-        else {
-            return res.send({message:'No Details found'})
-        }
+       
     } catch (error) {
         return res.status(500).send({message:error.message})
     }
@@ -75,3 +75,5 @@ serviceDetailsRouter.delete('/delete/:id', isAuth, isVendorOrAdmin, expressAsync
         return res.status(500).send({ message: error.message })
     }
 }));
+
+export default serviceDetailsRouter;

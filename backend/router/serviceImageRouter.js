@@ -8,7 +8,7 @@ const serviceImageRouter = express.Router();
 
 
 //image post  
-serviceImageRouter.post('/add',isAuth,isVendorOrAdmin, expressAsyncHandler(async (req,res) => {
+serviceImageRouter.post('/add',expressAsyncHandler(async (req,res) => {
     try {
         const images = new ServiceImage({
             image: req.body.image,
@@ -38,7 +38,7 @@ serviceImageRouter.get('/', expressAsyncHandler(async (req, res) => {
 }))
 // for particular service
 serviceImageRouter.get('/service', expressAsyncHandler(async (req, res) => {
-    const service = req.body.service
+    const service = req.query.service
     try {
         const images = await ServiceImage.find({ service: service });
         if (images) {
@@ -82,4 +82,6 @@ serviceImageRouter.put('/update/:id', isAuth, isVendorOrAdmin, expressAsyncHandl
         return res.status(500).send({message:error.message})
     }
 }))
+
+export default serviceImageRouter;
 

@@ -3,6 +3,7 @@ import express from 'express'
 import expressAsyncHandler from 'express-async-handler';
 import Review from '../model/ReviewModel.js';
 import Service from '../model/serviceModel.js';
+import User from '../model/userModel.js';
 import { isAdmin, isAuth } from '../utils.js';
 
 
@@ -32,8 +33,15 @@ reviewRouter.get('/user',isAuth, expressAsyncHandler(async (req, res) => {
 
 //for particular service 
 reviewRouter.get('/service', expressAsyncHandler(async (req, res) => {
-    const serviceId = req.body.service;
-    const review = await Review.findAll({ where: { service: serviceId } })
+    const serviceId = req.query.service;
+   
+    const review = await Review.findAll({
+        where: { service: serviceId },
+        include: [{
+            model: User,
+            attributes:['fullname','email']
+        }]
+    })
     if (review) {
         return res.status(200).send(review)
     }
@@ -59,8 +67,9 @@ reviewRouter.post('/add', isAuth, expressAsyncHandler(async (req, res) => {
         })
       
         const newNumReviews = count + 1;
+        const oldnumberReview = service.numReviews;
         service.numReviews = newNumReviews;
-        service.rating = (service.rating + parseInt(req.body.rating)) / newNumReviews;
+        service.rating = ((service.rating*oldnumberReview) + parseInt(req.body.rating)) / newNumReviews;
         const updateService = await service.save()
         if (updateService) {
             const reviews = await newReview.save()
@@ -106,7 +115,7 @@ reviewRouter.put('/:id', isAuth, expressAsyncHandler(async (req, res) => {
     return res.status(401).send({message:"You are not able to update this review"})
 }))
 // delete review
-reviewRouter.delete('/:id', isAuth, expressAsyncHandler(async (req, res) => {
+reviewRouter.delete('/delete/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const user = req.user.id;
     const reviewId = req.params.id;
     const review = await Review.findOne({ where: { id: reviewId } })

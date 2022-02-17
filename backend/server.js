@@ -15,6 +15,8 @@ import wishListRouter from './router/wishlistRouter.js';
 import reviewRouter from './router/ReviewRouter.js';
 import path from 'path';
 import uploadRouter from './router/uploadRouter.js';
+import serviceDetailsRouter from './router/serviceDetailsRouter.js';
+import serviceImageRouter from './router/serviceImageRouter.js';
 
 
 const app = express();
@@ -54,6 +56,8 @@ app.use('/api/category', categoriesRouter)
 app.use('/api/subcategory', subcategoriesRouter)
 app.use('/api/city', cityRouter)
 app.use('/api/service', serviceRouter)
+app.use('/api/details', serviceDetailsRouter)
+app.use('/api/images', serviceImageRouter)
 app.use('/api/review', reviewRouter)
 app.use('/api/wishlist', wishListRouter)
 
