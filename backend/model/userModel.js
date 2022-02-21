@@ -3,35 +3,35 @@ import db from '../database/postgressdb.js';
 
 
 const User = db.sequelize.define('user', {
-    id:{
+    id: {
         // Sequelize module has INTEGER Data_Type.
-        type:Sequelize.INTEGER,
+        type: Sequelize.INTEGER,
         // To increment user_id automatically.
-        autoIncrement:true,
+        autoIncrement: true,
         // user_id can not be null.
-        allowNull:false,
+        allowNull: false,
         // For uniquely identify user.
-        primaryKey:true
+        primaryKey: true
     },
-    fullname:{
-        type:Sequelize.STRING,
+    fullname: {
+        type: Sequelize.STRING,
         allowNull: false
     },
     phone: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    email:{
-        type:Sequelize.STRING,
+    email: {
+        type: Sequelize.STRING,
         allowNull: false
     },
-    password:{
-        type:Sequelize.STRING,
+    password: {
+        type: Sequelize.STRING,
         allowNull: false
     },
-    isAdmin:{
-        type:Sequelize.BOOLEAN,
-        default:false,
+    isAdmin: {
+        type: Sequelize.BOOLEAN,
+        default: false,
         allowNull: true
     },
     isVendor: {
@@ -46,9 +46,8 @@ const User = db.sequelize.define('user', {
     },
     createdAt: Sequelize.DATE,
     updatedAt: Sequelize.DATE,
-    
-})
+});
 
-User.sync()
+
 
 export default User;

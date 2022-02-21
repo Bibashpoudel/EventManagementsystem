@@ -16,9 +16,9 @@ const Review = db.sequelize.define('Review', {
     },
     service: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
-    user: {
+    user_id: {
         type: Sequelize.INTEGER,
         references: {
             // This is a reference to another model
@@ -26,20 +26,19 @@ const Review = db.sequelize.define('Review', {
             // This is the column name of the referenced model
             key: 'id'
         }
-    },   
+    },
     rating: {
         type: Sequelize.INTEGER,
-        allowNull:false
+        allowNull: false
     },
     comment: {
         type: Sequelize.STRING,
-        allowNull:true
+        allowNull: true
     },
     createdAt: Sequelize.DATE,
     updatedAt: Sequelize.DATE,
     
-})
-
-
-
+});
+Review.belongsTo(User,{ onDelete: 'cascade', foreignKey: 'user_id'})
+User.hasMany(Review, { foreignKey: 'user_id', as: 'Users'})
 export default Review;

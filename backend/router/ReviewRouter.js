@@ -22,14 +22,14 @@ reviewRouter.get('/',  expressAsyncHandler(async (req, res) => {
 }))
 
 //for particular user
-reviewRouter.get('/user',isAuth, expressAsyncHandler(async (req, res) => {
+reviewRouter.get('/user', isAuth, expressAsyncHandler(async (req, res) => {
     const user = req.user.id;
     const review = await Review.findAll({ where: { user: user } })
     if (review) {
         return res.status(200).send(review)
     }
-    return res.status(200).send({message:"No Review Found"})
-}))
+    return res.status(200).send({ message: "No Review Found" })
+}));
 
 //for particular service 
 reviewRouter.get('/service', expressAsyncHandler(async (req, res) => {
@@ -39,47 +39,51 @@ reviewRouter.get('/service', expressAsyncHandler(async (req, res) => {
         where: { service: serviceId },
         include: [{
             model: User,
-            attributes:['fullname','email']
+            attributes:['fullname']
         }]
     })
     if (review) {
         return res.status(200).send(review)
     }
-    return res.status(200).send({message:"No Review Yet"})
-}))
+    return res.status(200).send({ message: "No Review Yet" })
+}));
 
 reviewRouter.post('/add', isAuth, expressAsyncHandler(async (req, res) => {
     const user = req.user.id;
-    const serviceId = req.body.service;
-    const review = await Review.findOne({ where: { user: user, service: serviceId } })
-    const count = await Review.count({where:{service: serviceId}})
+    const serviceId = req.body.service; 
+    const review = await Review.findOne({ where: { user_id: user, service: serviceId } })
+    const count = await Review.count({ where: { service: serviceId } })
     const service = await Service.findById(serviceId);
    
-    if (review) {
-        return res.status(401).send({message:"You have already added Review and Comment "})
-    }
-    else {
-        const newReview = new Review({
-            user: user,
-            comment: req.body.comment,
-            service:serviceId,
-            rating:req.body.rating
-        })
-      
-        const newNumReviews = count + 1;
-        const oldnumberReview = service.numReviews;
-        service.numReviews = newNumReviews;
-        service.rating = ((service.rating*oldnumberReview) + parseInt(req.body.rating)) / newNumReviews;
-        const updateService = await service.save()
-        if (updateService) {
-            const reviews = await newReview.save()
-            if (reviews){
-                return res.status(201).send({message:"Review has been Added"})
-            }
+    if (service) {
+        if (review) {
+            return res.status(401).send({ message: "You have already added Review and Comment " })
         }
-        return res.status(500).send({message:'Somethings went Wrong'})
-    }
-}))
+        else {
+            const newReview = new Review({
+                user_id: user,
+                comment: req.body.comment,
+                service: serviceId,
+                rating: req.body.rating
+            })
+          
+            const newNumReviews = count + 1;
+            const oldnumberReview = service.numReviews;
+            service.numReviews = newNumReviews;
+            service.rating = ((service.rating * oldnumberReview) + parseInt(req.body.rating)) / newNumReviews;
+            const updateService = await service.save()
+            if (updateService) {
+                const reviews = await newReview.save()
+                if (reviews) {
+                    return res.status(201).send({ message: "Review has been Added" })
+                }
+            }
+            return res.status(500).send({ message: 'Somethings went Wrong' })
+        }
+    } else {
+        return res.status(404).send({ message: "No Service Found with given Service Id" })
+   }
+}));
 
 reviewRouter.put('/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const user = req.user.id
@@ -101,38 +105,38 @@ reviewRouter.put('/:id', isAuth, expressAsyncHandler(async (req, res) => {
         }
         const updateService = await service.save()
         review.rating = req.body.rating,
-        review.comment = req.body.comment
+            review.comment = req.body.comment
        
         if (updateService) {
-            const updateReview =await review.save();
+            const updateReview = await review.save();
             if (updateReview) {
-                return res.status(202).send({message:"Review updated Successfully"})  
+                return res.status(202).send({ message: "Review updated Successfully" })
             }
            
         }
-        return res.status(400).send({message:"Unable to update Review"})
+        return res.status(400).send({ message: "Unable to update Review" })
     }
-    return res.status(401).send({message:"You are not able to update this review"})
-}))
+    return res.status(401).send({ message: "You are not able to update this review" })
+}));
 // delete review
 reviewRouter.delete('/delete/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const user = req.user.id;
     const reviewId = req.params.id;
     const review = await Review.findOne({ where: { id: reviewId } })
     if (!review) {
-        return res.status(400).send({message:"No Review Found"})
+        return res.status(400).send({ message: "No Review Found" })
     }
     if (review.user === user || req.user.isAdmin === true || req.user.isVendor === true) {
         
         await review.destroy();
 
-        return res.status(200).send({message:"Review Deleted Successfully"})
+        return res.status(200).send({ message: "Review Deleted Successfully" })
     }
     else {
-        return res.status(403).send({message:'You are not Allowed'})
+        return res.status(403).send({ message: 'You are not Allowed' })
     }
     
     
-}))
+}));
 
 export default reviewRouter;
