@@ -43,7 +43,8 @@ const Tokenvalid = (req, res, next) => {
 }
 
 const isAuth =(req, res, next)=>{
-    const authorization = req.headers.authorization;
+  const authorization = req.headers.authorization;
+  console.log('token',authorization)
   if (authorization) {
     const token = authorization.slice(7, authorization.length); // Bearer XXXXXX
     jwt.verify(

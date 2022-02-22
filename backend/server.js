@@ -17,6 +17,10 @@ import path from 'path';
 import uploadRouter from './router/uploadRouter.js';
 import serviceDetailsRouter from './router/serviceDetailsRouter.js';
 import serviceImageRouter from './router/serviceImageRouter.js';
+import passport from 'passport';
+import auth from './router/auth.js';
+import cookieSession from 'cookie-session'
+import './passport.js'
 
 
 const app = express();
@@ -26,6 +30,13 @@ dotenv.config()
 //request parsing
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(
+    cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+  );
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // for storing file
 const __dirname = path.resolve();
@@ -52,6 +63,7 @@ app.get('/', (req, res)=>{
     res.send("welcome from server")
 })
 
+app.use('/auth', auth)
 app.use('/api/uploads', uploadRouter);
 app.use('/api/user', userRouter)
 app.use('/api/otp', otpRouter)
