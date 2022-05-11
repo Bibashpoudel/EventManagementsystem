@@ -14,6 +14,7 @@ import { messagePU, subject_mailPU } from '../templates/email/email_verification
 const userRouter = express.Router();
 
 userRouter.post('/register', expressAsyncHandler(async (req, res) => {
+    console.log("called")
     const user = await User.findOne({ where:{email: req.body.email} });
     const userphone = await User.findOne({ where:{phone: req.body.phone} });
     const verification_key = req.body.verification;
@@ -29,7 +30,7 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
       return res.status(400).send(response) 
     }
 
-    const otp_schema = await OTP.findOne({ where: { id: obj.otp_id } })
+    const otp_schema = await OTP.findOne({   _id: obj.otp_id  })
     if (otp_schema.verification != true) {
         const response={"Status":"Failure","Details":"OTP NOT Verified"}
         return res.status(400).send(response) 
@@ -51,7 +52,7 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
                 password: bcryptpassword,
             })
 
-           
+            console.log("called 1")
             const adduser = await user.save();
             if (adduser) {  
                 const output = `
@@ -177,7 +178,7 @@ userRouter.put('/changepassword', expressAsyncHandler(async (req, res) => {
         return res.status(400).send(response) 
         }
         
-        const otp_schema = await OTP.findOne({ where: { _id: obj.otp_id } })
+        const otp_schema = await OTP.findOne({  _id: obj.otp_id  })
         if (otp_schema.verification != true) {
             const response={"Status":"Failure","Details":"OTP NOT Verified"}
             return res.status(400).send(response) 

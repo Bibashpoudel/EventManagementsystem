@@ -20,6 +20,7 @@ cityRouter.post('/add', expressAsyncHandler(async (req, res) => {
         return res.status(500).send({message:"Some thing went wrong"})
     }
     
+    
 }))
 cityRouter.get('/', expressAsyncHandler(async (req, res) => {
     const city = await City.find()

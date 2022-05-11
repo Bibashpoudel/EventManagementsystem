@@ -7,7 +7,7 @@ import { isAuth } from '../utils.js'
 
 const serviceRouter = express.Router()
 
-serviceRouter.get('/', expressAsyncHandler(async (req, res) => {
+serviceRouter.get('/all', expressAsyncHandler(async (req, res) => {
     const categories = req.query.category || '';
     const city = req.query.city || '';
     const cityFilter = city ? { city } : {};
@@ -54,7 +54,7 @@ serviceRouter.get('/venue', expressAsyncHandler(async (req, res) => {
     let Venue = []
     try {
         for (x; x < count; x++){
-            if (service[x].categories.name === 'venue') {
+            if (service[x].categories.name === 'Venue') {
                 Venue.push(service[x])
          }
         
@@ -93,7 +93,7 @@ serviceRouter.get('/trending', expressAsyncHandler(async (req, res) => {
         }
         try {
             for (x; x < count; x++) {
-                if (service[x].categories.name === 'venue') {
+                if (service[x].categories.name === 'Venue') {
                     Trending.push(service[x])
                 }
            

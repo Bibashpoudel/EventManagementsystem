@@ -104,6 +104,10 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
             const response = { "Status": "failure", "message": "Email not exist" }
             return res.status(400).send(response)
         }
+        if(user && type === "VERIFICATION"){
+            const response = { "Status": "failure", "message": "Email already exist" }
+            return res.status(400).send(response)
+        }
         //const otp = otpGenerator.generate(6, {digits:true, upperCaseAlphabets: false, specialChars: false ,alphabets:false });
      
         const otp = await otpGen();        
@@ -114,19 +118,10 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
         const otp_data = new OTP({
             code: otp,
             expire_time: expiration_time,
-            verification: false,
-           
-            
+            verification: false,  
         })
-
         const otpsave = await otp_data.save()
-        // if (otpsave) {
-        //     return res.status(201).send(otpsave)
-        // }
-
-       
-       
-       
+        
         if (otpsave) {
             const messages={
                 "dates": now, 
@@ -135,24 +130,15 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
                 "message":"OTP sent to user",
                 "otp_id": otp_data._id
                 }
-            
                 // Encrypt the message object
-            
             const encoded = await encode(JSON.stringify(messages))
             
-            
-           
             if (type) {
                 if (type == "VERIFICATION") {
-                   
-                   
                     email_message = messageEV(otp)
                     email_subject = subject_mailEV
-                   
                 }
-               
                 else if (type == "FORGET") {
-                
                     email_message = messageF(otp)
                     email_subject = subject_mailF
                 }
@@ -178,30 +164,23 @@ otpRouter.post('/emailotp', expressAsyncHandler(async (req, res) => {
                 tls: {
                     rejectUnauthorized: false
                 }
-                
             });
           
-           
             const mailOptions = {
                 from: `"Techfortress"<pdlbibash77@gmail.com>`,
                 to: `${email}`,
                 subject: email_subject,
                 text: email_message,
             };
-          
             await transporter.verify();
-              
             //Send Email
             await transporter.sendMail(mailOptions, (error, response) => {
                 if (error) {
                     return res.status(400).send({ "Status": "messege send Fail", "message": error });
                 }
-    
             })
             return res.status(201).send({token:encoded})
         }
-    
-
     } catch (error) {
         const response={"Status":"server error","message": error}
         return res.status(400).send(response)
@@ -230,11 +209,7 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
     //Check if verification key is altered or not and store it in variable decoded after decryption
    
         decoded = await decode(verification_key)
-      
-    
-
         var obj = JSON.parse(decoded)
-       
         const check_obj = obj.check
 
     // Check if the OTP was meant for the same email or phone number for which it is being verified 
@@ -242,29 +217,19 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
       const response={"Status":"Failure", "message": "OTP was not sent to this particular email or phone number"}
       return res.status(400).send(response) 
     }
-
-        const otp_schema = await OTP.findOne({  _id: obj.otp_id  })
-      
-   
+        const otp_schema = await OTP.findOne({  _id: obj.otp_id  }) 
     //Check if OTP is available in the DB
         if (otp_schema != null) {
     
       //Check if OTP is already used or not
       if(otp_schema.verification !=true){
-
-       
-        
           //Check if OTP is expired or not
-   
           if (dates.compare(otp_schema.expire_time, currentdate)===1){
-              
               //Check if OTP is equal to the OTP in the DB
-            
               if(otp === otp_schema.code){
                   // Mark OTP as verified or used
                   otp_schema.verification=true
                   otp_schema.save()
-
                   const response={"Status":"Success", "message":"OTP Matched", "Check": check}
                   return res.status(200).send(response)
               }
@@ -291,9 +256,6 @@ otpRouter.put('/verify', expressAsyncHandler(async (req, res) => {
       const response={"Status":"Failure","message": err.message}
       return res.status(400).send(response)
   }
-
- 
-
 }))
 
 export default otpRouter;

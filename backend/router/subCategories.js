@@ -30,15 +30,20 @@ subcategoriesRouter.get('/venue/type', expressAsyncHandler(async (req, res) => {
    
     const service = await SubCategories.find({}).populate('categories', 'name')
     let venuetype =[]
-    for (x = 0; x < count; x++){
-        if (service[x].categories.name === 'venue') {
-            venuetype.push(service[x])
+    
+    try {
+        for (x = 0; x < count; x++){
+            if (service[x].categories.name === 'Venue') {
+                venuetype.push(service[x])
+            }
         }
+        if (service) {
+            return res.status(200).send(service)
+        }
+    } catch (error) {
+        return res.status(500).send({message:"error"})
     }
-    if (service) {
-        return res.status(200).send(service)
-    }
-        return res.status(500).send({message:'somethings went wrong'})
+        
 }))
 
 export default subcategoriesRouter;

@@ -59,7 +59,7 @@ wishListRouter.delete('/delete/:id',isAuth, expressAsyncHandler(async (req, res)
     const user = req.user.id
     const id = req.params.id
     try {
-        const wishlist = await Wishlist.findOne({ where: { id:id } })
+        const wishlist = await Wishlist.findOne({ where: { service:id } })
         if (wishlist) {
             if (wishlist.user === user) {
                 await wishlist.destroy()
@@ -69,10 +69,10 @@ wishListRouter.delete('/delete/:id',isAuth, expressAsyncHandler(async (req, res)
                 return res.status(403).send({message:'You are not Allowed'})
             }
         }
-        return res.status(404).send({message:'no wishlist found'})
+        return res.status(404).send({message:'No wishlist found'})
         
     } catch (error) {
-        return res.status(500).send({message:'Somethings went wrong'})
+        return res.status(500).send({message:'Somethings went wrong' + error})
     }
 }))
 
